@@ -8,6 +8,8 @@ LiquidCrystal_I2C lcd(0x27,16,2);  //I2C address = 0x27; LCD1602A (16 columns, 2
 #define NUM_KEYS 4
 #define RELAY 0
 
+bool lcd_temizlenib = false;
+
 int displey = 3;
 int stopp = 5;
 int ac = 6;
@@ -82,37 +84,6 @@ void setup() {
   lcd.print("LERIK 2025"); 
   delay(100);
   }
-void sonra_gorunush(){
-  lcd.clear();
-  lcd.setCursor(5,0);
-  lcd.print("PAROL");
-  lcd.setCursor(0,1);
-  lcd.print("Y");
-  lcd.setCursor(2,1);
-  lcd.print("    ");    
-  lcd.setCursor(10,1);
-  lcd.print("T");
-  lcd.setCursor(12,1);
-  lcd.print(parolT); 
-  delay(500);      
-}
-
-void ekran_sifirla(){
-  k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
-  s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
-  lcd.clear();
-  lcd.setCursor(5,0);
-  lcd.print("PAROL");   
-  lcd.setCursor(0,1);
-  lcd.print("Y");
-  lcd.setCursor(10,1);
-  lcd.print("T");
-  lcd.setCursor(12,1);
-  lcd.print(parolT); 
-  cursorPosition = 2;
-  inputString = " ";
-  cursorPosition = 2;
-}
 
 void stop_mentiqi(){
   digitalWrite(rSiqnal, LOW );
@@ -146,9 +117,75 @@ void siqnal_mentiqi(){
 }
 
 void parol_duzgundur(){
+  lcd.clear();
   digitalWrite (RELAY, HIGH);                    // включили реле
   delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
   digitalWrite (RELAY, LOW);                   // гасим реле
+}
+
+void ekran_sifirla(){
+  k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
+  s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
+  if (!lcd_temizlenib){
+    lcd.clear();
+    lcd_temizlenib = true;
+  }
+  lcd.setCursor(5,0);
+  lcd.print("PAROL");   
+  lcd.setCursor(0,1);
+  lcd.print("Y");
+  lcd.setCursor(10,1);
+  lcd.print("T");
+  lcd.setCursor(12,1);
+  lcd.print(parolT); 
+}
+
+void parol_mentiqi(){
+    key = keypad.getKey();    
+
+    if ( key != NO_KEY)                           // если она все-таки есть
+    {
+      if (cursorPosition < 6) {                  // Проверка, не превышена ли длина строки на дисплее
+        inputString += key;                      // Добавление нажатой цифры к строке ввода
+        lcd.setCursor(cursorPosition, 1);        // Установка курсора на позицию
+        lcd.print(key);                          // Отображение нажатой цифры на дисплее
+        cursorPosition++;                        // Перемещение курсора вправо
+      } 
+      
+      button_pressed [k] = key;                   //сохраняем эту кнопочку в массиве
+      k = k + 1;                                  // запоминаем сколько уже кнопок нажали
+      if(k == NUM_KEYS)                             // если нажали нужное количество кнопок
+      {
+        for ( uint8_t i = 0; i < NUM_KEYS; i++)       // пройдемся по всему массиву
+        {
+          if (button_pressed[i] == dogru_parol[i])          // и проверим нажатые кнопки с верным кодом
+          { 
+            s = s + 1;                                   // плюсуем счетчик совпадений  
+          }
+        } 
+        if(s == NUM_KEYS )              //если у нас все кнопки совпали с кодом, то включаем реле
+            {
+              parol_duzgundur();  
+              ekran_sifirla();
+              cursorPosition = 2;
+              inputString = " ";
+            } 
+        else {                                            
+            ekran_sifirla();   
+            cursorPosition = 2;
+            inputString = " ";                                                          
+          }
+      }  
+    }
+}
+
+void sonra_gorunush(){
+  if (!lcd_temizlenib){
+    lcd.clear();
+    lcd_temizlenib = true;
+  }
+  ekran_sifirla();
+  parol_mentiqi();
 }
 
 void loop() {
@@ -166,38 +203,7 @@ void loop() {
     dogru_parol[i] = buffer[i];       //parolu teyin edir
   }
 
-  key = keypad.getKey();    
 
-  if ( key != NO_KEY)                           // если она все-таки есть
-  {
-    if (cursorPosition < 6) {                  // Проверка, не превышена ли длина строки на дисплее
-      inputString += key;                      // Добавление нажатой цифры к строке ввода
-      lcd.setCursor(cursorPosition, 1);        // Установка курсора на позицию
-      lcd.print(key);                          // Отображение нажатой цифры на дисплее
-      cursorPosition++;                        // Перемещение курсора вправо
-    } 
-    
-    button_pressed [k] = key;                   //сохраняем эту кнопочку в массиве
-    k = k + 1;                                  // запоминаем сколько уже кнопок нажали
-    if(k == NUM_KEYS)                             // если нажали нужное количество кнопок
-    {
-      for ( uint8_t i = 0; i < NUM_KEYS; i++)       // пройдемся по всему массиву
-      {
-        if (button_pressed[i] == dogru_parol[i])          // и проверим нажатые кнопки с верным кодом
-        { 
-          s = s + 1;                                   // плюсуем счетчик совпадений  
-        }
-      } 
-      if(s == NUM_KEYS )              //если у нас все кнопки совпали с кодом, то включаем реле
-          {
-            parol_duzgundur();  
-            ekran_sifirla();
-          } 
-      else {                                            
-          ekran_sifirla();                                                             
-        }
-    }  
-  }
 // kochurulmush kod bitir
 
   if(digitalRead(stopp) == HIGH)
@@ -219,6 +225,7 @@ void loop() {
 
   if (evvelki_rejim == HIGH && indiki_rejim == LOW ) {
     rejim = !rejim;
+    lcd_temizlenib = false;
   }
     
   if(rejim == HIGH) {
