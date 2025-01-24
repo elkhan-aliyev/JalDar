@@ -117,6 +117,8 @@ void siqnal_mentiqi(){
 }
 
 void parol_duzgundur(){
+  k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
+  s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
   lcd.clear();
   digitalWrite (RELAY, HIGH);                    // включили реле
   delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
@@ -127,6 +129,8 @@ void parol_duzgundur(){
 }
 
 void parol_yanlishdir(){
+  k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
+  s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
   lcd_temizlenib = false;                                            
   ekran_sifirla();   
   lcd.setCursor(2,1);
