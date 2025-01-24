@@ -90,12 +90,67 @@ void sonra_gorunush(){
   lcd.print("Y");
   lcd.setCursor(2,1);
   lcd.print("    ");    
-  lcd.setCursor(9,1);
+  lcd.setCursor(10,1);
   lcd.print("T");
-  lcd.setCursor(11,1);
+  lcd.setCursor(12,1);
   lcd.print(parolT); 
   delay(500);      
 }
+
+void ekran_sifirla(){
+  k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
+  s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
+  lcd.clear();
+  lcd.setCursor(5,0);
+  lcd.print("PAROL");   
+  lcd.setCursor(0,1);
+  lcd.print("Y");
+  lcd.setCursor(10,1);
+  lcd.print("T");
+  lcd.setCursor(12,1);
+  lcd.print(parolT); 
+  cursorPosition = 2;
+  inputString = " ";
+  cursorPosition = 2;
+}
+
+void stop_mentiqi(){
+  digitalWrite(rSiqnal, LOW );
+  digitalWrite(rAc, LOW );                        
+  digitalWrite(rBagla, LOW);                      
+  digitalWrite(rAcar, LOW); 
+}
+
+void ac_mentiqi(){
+  digitalWrite(rSiqnal, HIGH );                       
+  digitalWrite(rBagla, LOW);                      
+  digitalWrite(rAcar, HIGH); 
+  delay(500);
+  digitalWrite(rAc, HIGH ); 
+  delay(3500);  
+  digitalWrite(rAcar, LOW); 
+}
+
+void bagla_mentiqi(){
+  digitalWrite(rAc, LOW ); 
+  digitalWrite(rAcar, LOW);       
+  digitalWrite(rSiqnal, HIGH );                       
+  digitalWrite(rBagla, HIGH);                      
+  delay(17000);
+  digitalWrite(rSiqnal, LOW ); 
+  digitalWrite(rBagla, LOW);
+}
+
+void siqnal_mentiqi(){
+  digitalWrite(rSiqnal, LOW);
+}
+
+void parol_duzgundur(){
+  digitalWrite (RELAY, HIGH);                    // включили реле
+  delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
+  digitalWrite (RELAY, LOW);                   // гасим реле
+}
+
 void loop() {
   evvelki_rejim = indiki_rejim;
   indiki_rejim = digitalRead(displey);
@@ -115,7 +170,6 @@ void loop() {
 
   if ( key != NO_KEY)                           // если она все-таки есть
   {
-  
     if (cursorPosition < 6) {                  // Проверка, не превышена ли длина строки на дисплее
       inputString += key;                      // Добавление нажатой цифры к строке ввода
       lcd.setCursor(cursorPosition, 1);        // Установка курсора на позицию
@@ -134,69 +188,33 @@ void loop() {
           s = s + 1;                                   // плюсуем счетчик совпадений  
         }
       } 
-
-    
       if(s == NUM_KEYS )              //если у нас все кнопки совпали с кодом, то включаем реле
           {
-            digitalWrite (RELAY, LOW);                    // включили реле
-            digitalWrite (LED2, HIGH);                    // зажгли зеленый светик (пользователь ввел верный код)
-            delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
-            digitalWrite (RELAY, HIGH);                   // гасим реле
-            digitalWrite (LED2, LOW);                     // гасим светик
+            parol_duzgundur();  
+            ekran_sifirla();
           } 
       else {                                            
-          digitalWrite (LED1, HIGH);                      
-          delay (3000);                                 
-          digitalWrite (LED1, LOW);                                                              
+          ekran_sifirla();                                                             
         }
-      k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
-      s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
-      lcd.clear();
-      lcd.setCursor(5,0);
-      lcd.print("PAROL");   
-      lcd.setCursor(0,1);
-      lcd.print("Y");
-      lcd.setCursor(10,1);
-      lcd.print("T");
-      lcd.setCursor(12,1);
-      lcd.print(parolT); 
-      cursorPosition = 2;
-      inputString = " ";
-      cursorPosition = 2;
     }  
   }
 // kochurulmush kod bitir
 
   if(digitalRead(stopp) == HIGH)
   {
-    digitalWrite(rSiqnal, LOW );
-    digitalWrite(rAc, LOW );                        
-    digitalWrite(rBagla, LOW);                      
-    digitalWrite(rAcar, LOW); 
-    }
+    stop_mentiqi();
+  }
   if(digitalRead(ac) == HIGH)
   {
-    digitalWrite(rSiqnal, HIGH );                       
-    digitalWrite(rBagla, LOW);                      
-    digitalWrite(rAcar, HIGH); 
-    delay(500);
-    digitalWrite(rAc, HIGH ); 
-    delay(3500);  
-    digitalWrite(rAcar, LOW);       
-    }
+    ac_mentiqi();      
+  }
   if(digitalRead(bagla) == HIGH)
   {
-    digitalWrite(rAc, LOW ); 
-    digitalWrite(rAcar, LOW);       
-    digitalWrite(rSiqnal, HIGH );                       
-    digitalWrite(rBagla, HIGH);                      
-    delay(17000);
-    digitalWrite(rSiqnal, LOW ); 
-    digitalWrite(rBagla, LOW);       
-    } 
+    bagla_mentiqi();       
+  } 
   if(digitalRead(siqnal) == HIGH)
   {
-    digitalWrite(rSiqnal, LOW ); 
+    siqnal_mentiqi(); 
   }
 
   if (evvelki_rejim == HIGH && indiki_rejim == LOW ) {
