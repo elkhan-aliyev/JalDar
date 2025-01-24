@@ -121,6 +121,19 @@ void parol_duzgundur(){
   digitalWrite (RELAY, HIGH);                    // включили реле
   delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
   digitalWrite (RELAY, LOW);                   // гасим реле
+  ekran_sifirla();
+  cursorPosition = 2;
+  inputString = " ";
+}
+
+void parol_yanlishdir(){
+  lcd_temizlenib = false;                                            
+  ekran_sifirla();   
+  lcd.setCursor(2,1);
+  lcd.print("    ");
+  cursorPosition = 2;
+  inputString = " "; 
+  parol_mentiqi();
 }
 
 void ekran_sifirla(){
@@ -166,14 +179,9 @@ void parol_mentiqi(){
         if(s == NUM_KEYS )              //если у нас все кнопки совпали с кодом, то включаем реле
             {
               parol_duzgundur();  
-              ekran_sifirla();
-              cursorPosition = 2;
-              inputString = " ";
             } 
-        else {                                            
-            ekran_sifirla();   
-            cursorPosition = 2;
-            inputString = " ";                                                          
+        else {
+              parol_yanlishdir();                                                         
           }
       }  
     }
