@@ -74,14 +74,16 @@ void setup() {
  
   indiki_rejim = digitalRead(displey);
 }
-  void girish_ekran(){
+
+void girish_ekran(){
   lcd.clear();
   lcd.setCursor(5,0);
   lcd.print("EN6.1");
   lcd.setCursor(3,1);
   lcd.print("LERIK 2025"); 
   delay(100);
-  }
+}
+
 void sonra_gorunush(){
   lcd.clear();
   lcd.setCursor(5,0);
@@ -96,6 +98,7 @@ void sonra_gorunush(){
   lcd.print(parolT); 
   delay(500);      
 }
+
 void loop() {
   evvelki_rejim = indiki_rejim;
   indiki_rejim = digitalRead(displey);
@@ -124,48 +127,52 @@ void loop() {
     } 
     
     button_pressed [k] = key;                   //сохраняем эту кнопочку в массиве
-    k = k + 1;                                  // запоминаем сколько уже кнопок нажали
+    k++;                                  // запоминаем сколько уже кнопок нажали
+    
     if(k == NUM_KEYS)                             // если нажали нужное количество кнопок
     {
-      for ( uint8_t i = 0; i < NUM_KEYS; i++)       // пройдемся по всему массиву
+      bool correct = true;
+      for ( int i = 0; i < NUM_KEYS; i++)       // пройдемся по всему массиву
       {
-        if (button_pressed[i] == dogru_parol[i])          // и проверим нажатые кнопки с верным кодом
+        if (button_pressed[i] != dogru_parol[i])          // и проверим нажатые кнопки с верным кодом
         { 
-          s = s + 1;                                   // плюсуем счетчик совпадений  
+          correct = false;
+          break;
         }
       } 
 
     
-      if(s == NUM_KEYS )              //если у нас все кнопки совпали с кодом, то включаем реле
-          {
-            digitalWrite (RELAY, LOW);                    // включили реле
-            digitalWrite (LED2, HIGH);                    // зажгли зеленый светик (пользователь ввел верный код)
-            delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
-            digitalWrite (RELAY, HIGH);                   // гасим реле
-            digitalWrite (LED2, LOW);                     // гасим светик
-          } 
+      if(correct )              //если у нас все кнопки совпали с кодом, то включаем реле
+        {
+          digitalWrite (RELAY, LOW);                    // включили реле
+          digitalWrite (LED2, HIGH);                    // зажгли зеленый светик (пользователь ввел верный код)
+          delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
+          digitalWrite (RELAY, HIGH);                   // гасим реле
+          digitalWrite (LED2, LOW);                     // гасим светик
+        } 
       else {                                            
           digitalWrite (LED1, HIGH);                      
           delay (3000);                                 
           digitalWrite (LED1, LOW);                                                              
         }
-      k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
-      s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
-      lcd.clear();
-      lcd.setCursor(5,0);
-      lcd.print("PAROL");   
-      lcd.setCursor(0,1);
-      lcd.print("Y");
-      lcd.setCursor(10,1);
-      lcd.print("T");
-      lcd.setCursor(12,1);
-      lcd.print(parolT); 
-      cursorPosition = 2;
-      inputString = " ";
-      cursorPosition = 2;
+
+        k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
+        s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
+        lcd.clear();
+        lcd.setCursor(5,0);
+        lcd.print("PAROL");   
+        lcd.setCursor(0,1);
+        lcd.print("Y");
+        lcd.setCursor(10,1);
+        lcd.print("T");
+        lcd.setCursor(12,1);
+        lcd.print(parolT); 
+        cursorPosition = 2;
+        inputString = " ";
+        cursorPosition = 2;
     }  
   }
-// kochurulmush kod bitir
+
 
   if(digitalRead(stopp) == HIGH)
   {
@@ -206,7 +213,9 @@ void loop() {
   if(rejim == HIGH) {
     sonra_gorunush(); 
   }
+
   else if(rejim == LOW) {
     girish_ekran(); 
   }    
+
 }
