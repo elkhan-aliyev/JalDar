@@ -219,3 +219,228 @@ void loop() {
   }    
 
 }
+
+
+/*
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+#include <Key.h>
+#include <Keypad.h>
+#include "SafeState.h"
+
+LiquidCrystal_I2C lcd(0x27,16,2);  //I2C address = 0x27; LCD1602A (16 columns, 2 rows)
+
+#define NUM_KEYS 4
+#define RELAY 0
+#define displey  3
+
+int parolT = A0;
+int rejim = LOW;
+int evvelki_rejim;
+int indiki_rejim;
+
+bool lcd_temizlenib = false;
+
+enum EkranAdi {
+  GIRISH,
+  PAROL_TEYIN_ET,
+  PAROL_DAXIL_ET
+};
+                                              
+const byte ROWS = 4;                                     
+const byte COLS = 4;                                     
+
+char keys[ROWS][COLS] = {                                
+  {'1','2','3', ' '},
+  {'4','5','6', ' '},
+  {'7','8','9', ' '},
+  {'0',' ','E', ' '}
+};
+
+byte rowPins[ROWS] = {1, 2, 12, 13};                     
+byte colPins[COLS] = {A4, A3, A2, A1};                       
+
+String inputString = " ";                                
+int cursorPosition = 2;                                 
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS );   
+
+SafeState safeState;
+
+// Global variables
+EkranAdi indikiEkran = GIRISH; // Start with the STARTUP screen
+int lastButtonState = HIGH;          // Previous button state (for debouncing)
+unsigned long lastDebounceTime = 0;  
+const unsigned long debounceDelay = 50;
+
+String inputSecretCode() {
+  
+  lcd.setCursor(5,0);
+  lcd.print("PAROL");   
+  lcd.setCursor(0,1);
+  lcd.print("Y");
+  lcd.setCursor(10,1);
+  lcd.print("T");
+
+
+  String result = "";
+  while (result.length() < 4) {
+    lcd.setCursor(12,1);
+    lcd.print(parolT);  
+    char key = keypad.getKey();
+    if (key >= '0' && key <= '9') {
+      lcd.setCursor(cursorPosition,1);
+      lcd.print('*');
+      result += key;
+      cursorPosition++;
+    }
+  }
+  cursorPosition = 2;
+  return result;
+}
+
+
+void setup() {
+  pinMode( parolT, INPUT );  
+  pinMode( displey, INPUT );
+  pinMode( RELAY, OUTPUT );
+
+
+  lcd.init();                 
+  lcd.begin(16, 2);
+  lcd.backlight();
+
+  girish_ekran();
+ 
+  indiki_rejim = digitalRead(displey);
+}
+
+void girish_ekran(){
+  lcd.clear();
+  lcd.setCursor(5,0);
+  lcd.print("EN6.1");
+  lcd.setCursor(3,1);
+  String message = "LERIK 2025";
+  for (byte i = 0; i < message.length(); i++) {
+    lcd.print(message[i]);
+    delay(100);
+  }
+}
+
+
+void parol_duzgundur(){
+                                         
+  lcd.clear();
+  digitalWrite (RELAY, HIGH);                    
+  delay (3000);                                 
+  digitalWrite (RELAY, LOW);                  
+  ekran_sifirla();
+  cursorPosition = 2;
+  inputString = " ";
+}
+
+void parol_yanlishdir(){
+                                         
+  lcd_temizlenib = false;                                            
+  ekran_sifirla();   
+  lcd.setCursor(2,1);
+  lcd.print("    ");
+  cursorPosition = 2;
+  inputString = " "; 
+  parol_mentiqi();
+}
+
+void ekran_sifirla(){
+                                          
+  if (!lcd_temizlenib){
+    lcd.clear();
+    lcd_temizlenib = true;
+  }
+  lcd.setCursor(5,0);
+  lcd.print("PAROL");   
+  lcd.setCursor(0,1);
+  lcd.print("Y");
+  lcd.setCursor(10,1);
+  lcd.print("T");
+  lcd.setCursor(12,1);
+  lcd.print(parolT); 
+}
+
+void parol_mentiqi(){
+
+
+
+  String verilen_parol = inputSecretCode();
+
+    if(verilen_parol == String(parolT) )              
+        {
+          parol_duzgundur();  
+        } 
+    else {
+          parol_yanlishdir();                                                         
+      }
+}
+
+void sonra_gorunush(){
+  if (!lcd_temizlenib){
+    lcd.clear();
+    lcd_temizlenib = true;
+  }
+  ekran_sifirla();
+  parol_mentiqi();
+}
+
+void ekran_duymesi_mentiqi(){
+  
+  indiki_rejim = digitalRead(displey);
+
+  if (evvelki_rejim == HIGH && indiki_rejim == LOW) {
+    cycleScreen();
+  }
+
+  evvelki_rejim = indiki_rejim;
+}
+
+
+void cycleScreen() {
+  // Cycle through the screens
+  indikiEkran = static_cast<EkranAdi>((indikiEkran + 1) % 3); // Wrap around after the last screen
+}
+
+void displayCurrentScreen() {
+  // Clear the LCD and display the current screen
+  lcd.clear();
+  switch (indikiEkran) {
+    case GIRISH:
+      girish_ekran();
+      break;
+    case PAROL_TEYIN_ET:
+      lcd.setCursor(0, 0);
+      lcd.print("Set Password:");
+      lcd.setCursor(0, 1);
+      lcd.print("Enter on keypad");
+      // Add logic to handle keypad input if needed
+      break;
+    case PAROL_DAXIL_ET:
+      lcd.setCursor(0, 0);
+      lcd.print("Enter Password:");
+      lcd.setCursor(0, 1);
+      lcd.print("Press to Confirm");
+      // Add logic to handle password verification
+      break;
+  }
+}
+
+void loop() {
+
+  ekran_duymesi_mentiqi();  // Check if the button was pressed
+  displayCurrentScreen(); // Update the screen if the state changes
+
+  parolT = analogRead(A0);
+  parolT = map(parolT, 0, 1023, 0, 9999 );
+}
+
+
+
+
+ */
