@@ -1,177 +1,132 @@
-#include <LiquidCrystal_I2C.h>
-#include <Wire.h>
 #include <Key.h>
 #include <Keypad.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 LiquidCrystal_I2C lcd(0x27,16,2);  //I2C address = 0x27; LCD1602A (16 columns, 2 rows)
 
-#define NUM_KEYS 4
-#define RELAY 0
+const int rDarvaza_PIN = 9;
+const int DISPLEY_PIN = 4;
+const int STOP_PIN = 5;
+const int ACH_PIN = 6;
+const int BAGHLA_PIN = 7;
+const int SIQNAL_PIN = 8;
+const int rSIQNAL_PIN = 0;
+const int rACH_PIN = 3;
+const int rBAGHLA_PIN = 2;
+const int rACHAR_PIN = 1;
+const int PAROL_PIN = A0;
 
-int displey = 3;
-int stopp = 5;
-int ac = 6;
-int bagla = 7;
-int siqnal = 8;
-int rSiqnal = 4;
-int rAc = 10;
-int rBagla = 11;
-int rAcar = 9;
-int parolT = A0; 
+#define NUM_KEYS 4                                       // количество знаков в коде
 int rejim = LOW;
 int evvelki_rejim;
 int indiki_rejim;
+int parolT = 0;
 
-char key;
+char key;        
 char dogru_parol[NUM_KEYS] = {'0', '0', '0', '0'};       //массив с верным кодом
-char button_pressed[NUM_KEYS];                           //массив для хранения нажатых кнопок
+char button_pressed[NUM_KEYS];                           //массив для хранения нажатых кнопок  
+char buffer[5]; // 4 reqemli parolu saxlamaq uchun kifayet qeder yer verilir
 
 int k = 0;                                               // счетчик нажатий
 int s = 0;                                               // счетчик совпадений нажатых кнопок с верными
-const byte ROWS = 4;                                     // количество строк в матрице клавиатуры
-const byte COLS = 3;                                     // количество столбцов
+const byte ROWS = 4;                                     
+const byte COLS = 3;                                     
 
-char keys[ROWS][COLS] = {                                // таблица соответствия кнопок символам
+char keys[ROWS][COLS] = {                                
   {'1','2','3'},
   {'4','5','6'},
   {'7','8','9'},
   {'0',' ','E'}
 };
 
-byte rowPins[ROWS] = {1, 2, 12, 13};                     // пины подключенных строк
-byte colPins[COLS] = {A1, A2, A3};                       // пины подключенных столбцов
+byte rowPins[ROWS] = {10, 11, 12, 13};                     
+byte colPins[COLS] = {A1, A2, A3};
 
-String inputString = " ";                                 // Строка для ввода чисел 
 int cursorPosition = 2;                                  // Позиция курсора на дисплее 
 
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS );   // создаем объект клавиатуры для работы с ней
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS ); 
 
+void girish_ekran_animasiya(){
+  lcd.clear();
+  lcd.setCursor(5,0);
+  lcd.print("EN6.1");
+  lcd.setCursor(1,1);
+  String mesaj = "JALYUZ_DARVAZA";
+  for (byte i = 0; i < mesaj.length(); i++){
+    lcd.print(mesaj[i]);
+    delay(100);
+  }
+  delay(1000);
+  lcd.clear();
+}
 
+void girish_ekran(){
+  lcd.setCursor(5,0);
+  lcd.print("EN6.1");
+  lcd.setCursor(1,1);
+  lcd.print("JALYUZ_DARVAZA");
+}
 
+void sonra_gorunush(){                    //Displey
+  // lcd.clear();
+  lcd.setCursor(5,0);
+  lcd.print("PAROL");
+  lcd.setCursor(0,1);
+  lcd.print("Y"); 
+  lcd.setCursor(10,1);
+  lcd.print("T");
+  lcd.setCursor(12,1);
+  lcd.print(buffer);
+  delay(200);      
+}
 void setup() {
-  pinMode( parolT, INPUT );  
-  pinMode( displey, INPUT );
-  pinMode( rSiqnal, OUTPUT );  
-  pinMode( stopp, INPUT );
-  pinMode( bagla, INPUT );
-  pinMode( ac, INPUT );
-  pinMode( siqnal, INPUT );
-  pinMode( rAc, OUTPUT );  
-  pinMode( rBagla, OUTPUT );  
-  pinMode( rAcar, OUTPUT );  
-  pinMode( RELAY, OUTPUT );
-  
-  digitalWrite(rSiqnal, LOW );
-  digitalWrite(rAc, LOW );                        
-  digitalWrite(rBagla, LOW);                      
-  digitalWrite(rAcar, LOW);
+
+  pinMode( PAROL_PIN, INPUT );  
+  pinMode( DISPLEY_PIN, INPUT );
+  pinMode( STOP_PIN, INPUT );
+  pinMode( BAGHLA_PIN, INPUT );
+  pinMode( ACH_PIN, INPUT );
+  pinMode( SIQNAL_PIN, INPUT );
+  pinMode( rSIQNAL_PIN, OUTPUT);
+  pinMode( rACH_PIN, OUTPUT);
+  pinMode( rBAGHLA_PIN, OUTPUT);
+  pinMode( rACHAR_PIN, OUTPUT);
+  pinMode( rDarvaza_PIN, OUTPUT );
+
+  digitalWrite(rSIQNAL_PIN, LOW);
+  digitalWrite(rACH_PIN, LOW);
+  digitalWrite(rBAGHLA_PIN, LOW);
+  digitalWrite(rACHAR_PIN, LOW);
+  digitalWrite(rDarvaza_PIN, LOW);              // Darvaza rele
 
   lcd.init();                 
   lcd.begin(16, 2);
   lcd.backlight();
 
-  girish_ekran();       // giriş ekranı - ilk ekran açılır
- 
-  indiki_rejim = digitalRead(displey);
-}
-  void girish_ekran(){
-  lcd.clear();
-  lcd.setCursor(5,0);
-  lcd.print("EN6.1");
-  lcd.setCursor(3,1);
-  lcd.print("LERIK 2025"); 
-  delay(100);
-  }
-void sonra_gorunush(){
-  lcd.clear();
-  lcd.setCursor(5,0);
-  lcd.print("PAROL");
-  lcd.setCursor(0,1);
-  lcd.print("Y");
-  lcd.setCursor(2,1);
-  lcd.print("    ");    
-  lcd.setCursor(10,1);
-  lcd.print("T");
-  lcd.setCursor(12,1);
-  lcd.print(parolT); 
-  delay(500);      
-}
+  girish_ekran_animasiya();
 
-void ekran_sifirla(){
-  k = 0;                                           //сбрасываем счетчик нажатий нашей переменной
-  s = 0;                                           // сбрасываем счетчик совпадений нашей переменной
-  lcd.clear();
-  lcd.setCursor(5,0);
-  lcd.print("PAROL");   
-  lcd.setCursor(0,1);
-  lcd.print("Y");
-  lcd.setCursor(10,1);
-  lcd.print("T");
-  lcd.setCursor(12,1);
-  lcd.print(parolT); 
-  cursorPosition = 2;
-  inputString = " ";
-  cursorPosition = 2;
-}
-
-void stop_mentiqi(){
-  digitalWrite(rSiqnal, LOW );
-  digitalWrite(rAc, LOW );                        
-  digitalWrite(rBagla, LOW);                      
-  digitalWrite(rAcar, LOW); 
-}
-
-void ac_mentiqi(){
-  digitalWrite(rSiqnal, HIGH );                       
-  digitalWrite(rBagla, LOW);                      
-  digitalWrite(rAcar, HIGH); 
-  delay(500);
-  digitalWrite(rAc, HIGH ); 
-  delay(3500);  
-  digitalWrite(rAcar, LOW); 
-}
-
-void bagla_mentiqi(){
-  digitalWrite(rAc, LOW ); 
-  digitalWrite(rAcar, LOW);       
-  digitalWrite(rSiqnal, HIGH );                       
-  digitalWrite(rBagla, HIGH);                      
-  delay(17000);
-  digitalWrite(rSiqnal, LOW ); 
-  digitalWrite(rBagla, LOW);
-}
-
-void siqnal_mentiqi(){
-  digitalWrite(rSiqnal, LOW);
-}
-
-void parol_duzgundur(){
-  digitalWrite (RELAY, HIGH);                    // включили реле
-  delay (3000);                                 // ждем 3 секунд пока горит светик зеленый и включено реле
-  digitalWrite (RELAY, LOW);                   // гасим реле
 }
 
 void loop() {
   evvelki_rejim = indiki_rejim;
-  indiki_rejim = digitalRead(displey);
+  indiki_rejim = digitalRead(DISPLEY_PIN);
 
-  parolT = analogRead(A0);
-  parolT = map(parolT, 0, 1023, 0, 9999 );
+  parolT = analogRead(PAROL_PIN);                      //Displey
+  parolT = map(parolT, 0, 1023, 0, 9999 );      //Displey
 
- // kochurulmush kod bashlayir
-  char buffer[5]; // 4 reqemli parolu saxlamaq uchun kifayet qeder yer verilir
   snprintf(buffer, sizeof(buffer), "%04d", parolT); // 0000 formatinda string yeri
 
   for (int i = 0; i < NUM_KEYS; i++){
-    dogru_parol[i] = buffer[i];       //parolu teyin edir
-  }
+    dogru_parol[i] = buffer[i];
+  }  
 
-  key = keypad.getKey();    
+  key = keypad.getKey();                       // спрашиваем у клавиатуры, есть нажатая кнопка?
 
   if ( key != NO_KEY)                           // если она все-таки есть
   {
+  
     if (cursorPosition < 6) {                  // Проверка, не превышена ли длина строки на дисплее
-      inputString += key;                      // Добавление нажатой цифры к строке ввода
       lcd.setCursor(cursorPosition, 1);        // Установка курсора на позицию
       lcd.print(key);                          // Отображение нажатой цифры на дисплее
       cursorPosition++;                        // Перемещение курсора вправо
@@ -187,44 +142,66 @@ void loop() {
         { 
           s = s + 1;                                   // плюсуем счетчик совпадений  
         }
-      } 
+    } 
+
+    
       if(s == NUM_KEYS )              //если у нас все кнопки совпали с кодом, то включаем реле
           {
-            parol_duzgundur();  
-            ekran_sifirla();
+           digitalWrite (rDarvaza_PIN, HIGH);                    // включили реле
+           delay (2000);                                         // ждем 2 секунд пока горит светик зеленый и включено реле
+           digitalWrite (rDarvaza_PIN, LOW);                   // гасим реле
           } 
-      else {                                            
-          ekran_sifirla();                                                             
+      else {                                                                 
+          // parol doghru deyilse                                        
         }
-    }  
-  }
-// kochurulmush kod bitir
+        
+        delay(750);
+        k = 0;                                           
+        s = 0;
+        lcd.clear();
+        sonra_gorunush();   
+        cursorPosition = 2; 
+       
+      }
+    }
 
-  if(digitalRead(stopp) == HIGH)
-  {
-    stop_mentiqi();
+    if (evvelki_rejim && !indiki_rejim){
+      lcd.clear();
+      rejim = !rejim;
+    }
+
+    if(rejim) {
+      sonra_gorunush();  
+    }
+    else if (!rejim) {
+      girish_ekran(); 
+    }
+
+  if (digitalRead(STOP_PIN)){
+    digitalWrite(rSIQNAL_PIN, LOW);
+    digitalWrite(rACH_PIN, LOW);
+    digitalWrite(rBAGHLA_PIN, LOW);
+    digitalWrite(rACHAR_PIN, LOW);
   }
-  if(digitalRead(ac) == HIGH)
-  {
-    ac_mentiqi();      
+  if (digitalRead(ACH_PIN)){
+    digitalWrite(rSIQNAL_PIN, HIGH);
+    digitalWrite(rBAGHLA_PIN, LOW);
+    digitalWrite(rACHAR_PIN, HIGH);
+    delay(500);
+    digitalWrite(rACH_PIN, HIGH);
+    delay(3500);
+    digitalWrite(rACHAR_PIN, LOW);
   }
-  if(digitalRead(bagla) == HIGH)
-  {
-    bagla_mentiqi();       
+  if(digitalRead(BAGHLA_PIN)){
+    digitalWrite(rACH_PIN, LOW);
+    digitalWrite(rACHAR_PIN, LOW);
+    digitalWrite(rSIQNAL_PIN, HIGH);
+    digitalWrite(rBAGHLA_PIN, HIGH);
+    delay(17000);
+    digitalWrite(rSIQNAL_PIN, LOW);
+    digitalWrite(rBAGHLA_PIN, LOW);
+  }
+  if(digitalRead(SIQNAL_PIN)){
+    digitalWrite(rSIQNAL_PIN, LOW);
   } 
-  if(digitalRead(siqnal) == HIGH)
-  {
-    siqnal_mentiqi(); 
-  }
-
-  if (evvelki_rejim == HIGH && indiki_rejim == LOW ) {
-    rejim = !rejim;
-  }
-    
-  if(rejim == HIGH) {
-    sonra_gorunush(); 
-  }
-  else if(rejim == LOW) {
-    girish_ekran(); 
-  }    
 }
