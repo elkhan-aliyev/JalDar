@@ -1,4 +1,4 @@
-# JalDar (EN6.1) - yeni versiya
+# JalDar (EN6.1)
 
 ## Məlumat
 Bu layihə [Elxan Əliyev](https://github.com/elkhan-aliyev) tərəfindən tərtib edilmiş və şəxsi istifadə üçün nəzərdə tutulmuşdur. Proqramın tərtib edilməsində [Nurlan Əliyev](https://github.com/nurlan-aliyev) də iştirak etmişdir. 
@@ -17,3 +17,6 @@ Bu layihənin ərsəyə gəlməsinin əsasında, illərlə əllə idarə olunan 
 - [ArduinoIDE](https://www.arduino.cc/en/software)
 - [Wokwi Simulator](https://wokwi.com/projects/421055215095632897)
 - [JalDar Copy](https://wokwi.com/projects/427241341006610433) 
+
+##### Tərtib edilmişdir
+- Lerik, Azərbaycan, 2025
