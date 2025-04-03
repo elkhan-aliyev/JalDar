@@ -16,6 +16,7 @@ Bu layihənin ərsəyə gəlməsinin əsasında, illərlə əllə idarə olunan 
 ### Software
 - [ArduinoIDE](https://www.arduino.cc/en/software)
 - [Wokwi Simulator](https://wokwi.com/projects/421055215095632897)
+- [JalDar Copy](https://wokwi.com/projects/427241341006610433) 
 
 ##### Tərtib edilmişdir
 - Lerik, Azərbaycan, 2025
