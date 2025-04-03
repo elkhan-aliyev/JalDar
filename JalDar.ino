@@ -31,13 +31,15 @@ char buffer[5]; // 4 reqemli parolu saxlamaq uchun kifayet qeder yer verilir
 int k = 0;                                               // счетчик нажатий
 int s = 0;                                               // счетчик совпадений нажатых кнопок с верными
 const byte ROWS = 4;                                     
-const byte COLS = 3;                                     
+const byte COLS = 3;     
+
+unsigned long parol_daxil_edilir_zaman, parol_daxil_bitdi_zaman;
 
 char keys[ROWS][COLS] = {                                
   {'1','2','3'},
   {'4','5','6'},
   {'7','8','9'},
-  {'0',' ','E'}
+  {'N','0','E'}
 };
 
 byte rowPins[ROWS] = {10, 11, 12, 13};                     
@@ -108,16 +110,25 @@ void setup() {
 
 }
 
+void parol_sifirla(){
+  k = 0;                                           
+  s = 0;
+  lcd.clear();
+  sonra_gorunush();   
+  cursorPosition = 2;
+}
+
 void loop() {
   evvelki_rejim = indiki_rejim;
   indiki_rejim = digitalRead(DISPLEY_PIN);
 
   parolT = analogRead(PAROL_PIN);                      //Displey
-  parolT = map(parolT, 0, 1023, 0, 9999 );      //Displey
+  parolT = map(parolT, 0, 1023, 0, 109 );      //Displey
 
-  snprintf(buffer, sizeof(buffer), "%04d", parolT); // 0000 formatinda string yeri
+  snprintf(buffer, sizeof(buffer), "%04d", parolT*91); // 0000 formatinda string yeri
 
-  for (int i = 0; i < NUM_KEYS; i++){
+  for (int i = 0; i < NUM_KEYS; i++)
+  {
     dogru_parol[i] = buffer[i];
   }  
 
@@ -125,15 +136,23 @@ void loop() {
 
   if ( key != NO_KEY)                           // если она все-таки есть
   {
-  
+    parol_daxil_edilir_zaman = millis();
+
+    if (key == 'E'){
+      parol_sifirla();
+    }
+
     if (cursorPosition < 6) {                  // Проверка, не превышена ли длина строки на дисплее
       lcd.setCursor(cursorPosition, 1);        // Установка курсора на позицию
       lcd.print(key);                          // Отображение нажатой цифры на дисплее
       cursorPosition++;                        // Перемещение курсора вправо
     } 
     
-    button_pressed [k] = key;                   //сохраняем эту кнопочку в массиве
-    k = k + 1;                                  // запоминаем сколько уже кнопок нажали
+    if (key != 'E' && key != 'N'){             // Yanlizca reqemleri qebul et 
+      button_pressed [k] = key;                //сохраняем эту кнопочку в массиве
+      k = k + 1;                               // запоминаем сколько уже кнопок нажали
+    }
+
     if(k == NUM_KEYS)                             // если нажали нужное количество кнопок
     {
       for ( uint8_t i = 0; i < NUM_KEYS; i++)       // пройдемся по всему массиву
@@ -142,40 +161,36 @@ void loop() {
         { 
           s = s + 1;                                   // плюсуем счетчик совпадений  
         }
-    } 
+      } 
 
-    
       if(s == NUM_KEYS )              //если у нас все кнопки совпали с кодом, то включаем реле
-          {
-           digitalWrite (rDarvaza_PIN, HIGH);                    // включили реле
-           delay (2000);                                         // ждем 2 секунд пока горит светик зеленый и включено реле
-           digitalWrite (rDarvaza_PIN, LOW);                   // гасим реле
-          } 
-      else {                                                                 
-          // parol doghru deyilse                                        
-        }
-        
-        delay(750);
-        k = 0;                                           
-        s = 0;
-        lcd.clear();
-        sonra_gorunush();   
-        cursorPosition = 2; 
-       
-      }
+      {
+        digitalWrite (rDarvaza_PIN, HIGH);                    // включили реле
+        delay (1000);                                         // ждем 2 секунд пока горит светик зеленый и включено реле
+        digitalWrite (rDarvaza_PIN, LOW);                   // гасим реле
+      }  
+               
+      delay(750);
+      parol_sifirla(); 
     }
 
-    if (evvelki_rejim && !indiki_rejim){
-      lcd.clear();
-      rejim = !rejim;
-    }
+    parol_daxil_bitdi_zaman = millis();
 
-    if(rejim) {
-      sonra_gorunush();  
-    }
-    else if (!rejim) {
-      girish_ekran(); 
-    }
+    if(parol_daxil_edilir_zaman - parol_daxil_bitdi_zaman == 6000){
+      parol_sifirla();
+    }    
+  }
+
+  if (evvelki_rejim && !indiki_rejim){
+    lcd.clear();
+    rejim = !rejim;
+  }
+  if(rejim) {
+    sonra_gorunush();  
+  }
+  else if (!rejim) {
+    girish_ekran(); 
+  }
 
   if (digitalRead(STOP_PIN)){
     digitalWrite(rSIQNAL_PIN, LOW);
