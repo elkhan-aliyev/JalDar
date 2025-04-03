@@ -33,7 +33,6 @@ int s = 0;                                               // счетчик со�
 const byte ROWS = 4;                                     
 const byte COLS = 3;     
 
-unsigned long parol_daxil_edilir_zaman, parol_daxil_bitdi_zaman;
 
 char keys[ROWS][COLS] = {                                
   {'1','2','3'},
@@ -134,13 +133,12 @@ void loop() {
 
   key = keypad.getKey();                       // спрашиваем у клавиатуры, есть нажатая кнопка?
 
-  if ( key != NO_KEY)                           // если она все-таки есть
-  {
-    parol_daxil_edilir_zaman = millis();
+  if (key != NO_KEY && key == 'E'){
+    parol_sifirla();
+  }
 
-    if (key == 'E'){
-      parol_sifirla();
-    }
+  if ( key != NO_KEY && key != 'E' && key != 'N')                           // если она все-таки есть
+  {
 
     if (cursorPosition < 6) {                  // Проверка, не превышена ли длина строки на дисплее
       lcd.setCursor(cursorPosition, 1);        // Установка курсора на позицию
@@ -148,10 +146,9 @@ void loop() {
       cursorPosition++;                        // Перемещение курсора вправо
     } 
     
-    if (key != 'E' && key != 'N'){             // Yanlizca reqemleri qebul et 
-      button_pressed [k] = key;                //сохраняем эту кнопочку в массиве
-      k = k + 1;                               // запоминаем сколько уже кнопок нажали
-    }
+
+    button_pressed [k] = key;                //сохраняем эту кнопочку в массиве
+    k = k + 1;                               // запоминаем сколько уже кнопок нажали
 
     if(k == NUM_KEYS)                             // если нажали нужное количество кнопок
     {
@@ -173,12 +170,6 @@ void loop() {
       delay(750);
       parol_sifirla(); 
     }
-
-    parol_daxil_bitdi_zaman = millis();
-
-    if(parol_daxil_edilir_zaman - parol_daxil_bitdi_zaman == 6000){
-      parol_sifirla();
-    }    
   }
 
   if (evvelki_rejim && !indiki_rejim){
